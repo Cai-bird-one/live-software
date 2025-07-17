@@ -1,4 +1,4 @@
-
+from ..utils.config import Config
 class Node:
     """
     A node in the DAG
@@ -6,12 +6,15 @@ class Node:
     subclasses: list
     members: list
     className: str
-    classPath: str
+    baseClass: str
 
-    def __init__(self, path):
-        self.path = path
+    def __init__(self, config: Config):
+        self.config = config
+        self.subclasses = []
+        self.members = []
+        self.className = ""
     
-    def get_codes():
+    def get_codes(self):
         """
         Returns the code of the class
         """

@@ -2,7 +2,7 @@ import subprocess
 import os
 import uuid
 
-def run_local_code_in_docker(code_dir: str, entry_file: str = "main.py", timeout: int = 5):
+def run_local_code_in_docker(code_dir: str, entry_file: str = "main.py", args = None, timeout: int = 60):
     """
     将本地目录挂载到 Docker 容器中，执行指定入口文件。
     
@@ -20,18 +20,22 @@ def run_local_code_in_docker(code_dir: str, entry_file: str = "main.py", timeout
 
     container_name = f"sandbox_{uuid.uuid4().hex[:8]}"
 
-    docker_cmd = [
-        "docker", "run", "--rm",
-        "--name", container_name,
-        "--network", "none",           # 禁用网络
-        "--cpus=0.5",                  # 限制 CPU
-        "--memory=128m",              # 限制内存
-        "-v", f"{os.path.abspath(code_dir)}:/app:ro",  # 挂载整个目录为只读
-        "python:3.11-slim",
-        "timeout", str(timeout),
-        "python", f"/app/{entry_file}"
-    ]
+    args_list = args.split() if args else []
+    print(args_list)
 
+    docker_cmd = [
+    "docker", "run", "--rm",
+    "--name", container_name,
+    "--network", "none",
+    "--cpus=0.5",
+    "--memory=128m",
+    "-v", f"{os.path.abspath(code_dir)}:/app:ro",
+    "python:3.11",
+    "timeout", str(timeout),
+    "python", f"/app/{entry_file}",
+    ] + args_list
+
+    print(" ".join(docker_cmd))
     try:
         result = subprocess.run(
             docker_cmd,

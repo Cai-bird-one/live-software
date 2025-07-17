@@ -21,7 +21,6 @@ from ..utils.config import ModelParameters
 from .base_client import BaseLLMClient
 from .llm_basics import LLMMessage, LLMResponse, LLMUsage
 
-
 class OpenAIClient(BaseLLMClient):
     """OpenAI client wrapper with tool schema generation."""
 
@@ -58,12 +57,10 @@ class OpenAIClient(BaseLLMClient):
     ) -> LLMResponse:
         """Send chat messages to OpenAI with optional tool support."""
         openai_messages: ResponseInputParam = self.parse_messages(messages)
-
         api_call_input: ResponseInputParam = []
         if reuse_history:
             api_call_input.extend(self.message_history)
         api_call_input.extend(openai_messages)
-
         response = None
         error_message = ""
         for i in range(model_parameters.max_retries):
@@ -134,12 +131,8 @@ class OpenAIClient(BaseLLMClient):
         for msg in messages:
             if not msg.content:
                 raise ValueError("Message content is required")
-            if msg.role == "system":
-                openai_messages.append({"role": "system", "content": msg.content})
-            elif msg.role == "user":
-                openai_messages.append({"role": "user", "content": msg.content})
-            elif msg.role == "assistant":
-                openai_messages.append({"role": "assistant", "content": msg.content})
+            elif msg.role in {"system", "user", "assistant"}:
+                openai_messages.append({"role": msg.role, "content": msg.parse_to_str()})
             else:
                 raise ValueError(f"Invalid message role: {msg.role}")
         return openai_messages
