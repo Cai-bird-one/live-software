@@ -1,7 +1,7 @@
 import json
 import os
 import shutil
-
+import subprocess
 class StateManager:
     def __init__(self):
         self.dir="/home/birdcly/live software/codes"
@@ -9,10 +9,9 @@ class StateManager:
         shutil.rmtree(self.dir)
         os.mkdir(self.dir)
         self.design=""
-        # 创建一个docker容器
+        self.usage=""
 
     def load_code(self):
-        # 查询一个目录下的所有python文件，用文件路径作为字典的key，用代码内容作为值
         codes={}
         for file in os.listdir(self.dir):
             if file.endswith(".py"):
@@ -28,7 +27,33 @@ class StateManager:
         return self.design
     
     def save_design(self, design):
-        self.design=design
+        self.design = design
 
-    # def run_code(self, entry_file, args):
-        
+    def load_usage(self):
+        return self.usage
+
+    def save_usage(self, usage):
+        self.usage = usage
+
+    def run_code(self, entry_file, args):
+        if args is str:
+            args = args.split(" ")
+        cmd = ["python", os.path.join(self.dir, entry_file)] + args
+        try:
+            result = subprocess.run(cmd)
+            return result
+        except subprocess.CalledProcessError as e:
+            return e.output
+    
+    def state_str(self):
+        state = {
+            "design": self.design,
+            "code": self.load_code(),
+            "usage": self.usage
+        }
+        return json.dumps(state)
+    
+    def update(self, response):
+        self.save_design(response["design"])
+        self.save_code(response["code"])
+        self.save_usage(response["usage"])

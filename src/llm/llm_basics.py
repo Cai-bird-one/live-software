@@ -12,19 +12,10 @@ class LLMMessage:
 
     role: str
     content: str | None = None
-    design: str | None = None
-    codes: str | None = None
 
-    def parse_to_str(self) -> str:
-        if self.content:
-            result = self.content
-        else:
-            raise ValueError("LLMMessage does not contain content.")
-        if self.design:
-            result += f"\ndesign: {self.design}"
-        if self.codes:
-            result += f"\ndesign: {self.codes}"
-        return result
+    def parse_to_str(self):
+        """Parse the message to a string."""
+        return self.content
 @dataclass
 class LLMUsage:
     """LLM usage format."""

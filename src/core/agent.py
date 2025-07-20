@@ -1,7 +1,7 @@
 from ..utils.config import Config
 from ..llm.llm_client import LLMClient
 from ..llm.llm_basics import LLMMessage, LLMResponse
-from ..utils.templates import add_method_template
+from ..utils.templates import add_method_template, request_template, get_answer_template
 from ..utils.running import run_local_code_in_docker
 from ..utils.state_manager import StateManager
 import json
@@ -17,34 +17,49 @@ class LiveSoftware:
         self.client = LLMClient(config.default_provider, config.model_providers[config.default_provider])
         self.state_manager = StateManager()
     def add_method(self, request):
-        codes = self.state_manager.load_code()
-        design = self.state_manager.load_design()
-        message = LLMMessage(role="user", content=add_method_template(request), design=design, codes=codes)
-        response = self.client.chat([LLMMessage(role="user", content=message.parse_to_str())],model_parameters=config.model_providers[config.default_provider])
+        message = LLMMessage(role="user", content=add_method_template(request, self.state_manager.state_str()))
+        response = self.client.chat([message],model_parameters=config.model_providers[config.default_provider])
         # print(response)
         response = json.loads(response.content)
-        self.state_manager.save_design(response["design"])
-        self.state_manager.save_code(response["code"])
+        # print(response)
+        self.state_manager.update(response)
         return response
     def run_code(self, entry_file, args):
-        try:
-            # result = run_local_code_in_docker("/home/birdcly/live software/codes", entry_file, args)
-            run_cmd = ["python", f"/home/birdcly/live software/codes/{entry_file}", *args.split(" ")]
-            result = subprocess.run(run_cmd, capture_output=True, timeout=60)
-            return result
-        except Exception as e:
-            return e
+        return self.state_manager.run_code(entry_file, args)
+    def request(self, request):
+        message = LLMMessage(role="user", content=request_template(request, self.state_manager.state_str()))
+        response = self.client.chat([message],model_parameters=config.model_providers[config.default_provider])
+        response = json.loads(response.content)
+        # print(response)
+        if "method" in response:
+            self.add_method(response["method"])
+        if "run" in response:
+            entry_file = response["run"]["entry_file"]
+            args = response["run"]["args"]
+            results = self.run_code(entry_file, args)
+            results = self.get_answer(request, response, results)
+            return results
+        else:
+            results = self.request(request)
+        return results
+    def get_answer(self, request, response, result):
+        message = LLMMessage(role="user", content=get_answer_template(request, self.state_manager.state_str(),
+        json.dumps(response["run"]), json.dumps({
+        "args": result.args,
+        "returncode": result.returncode,
+        "stdout": result.stdout,
+        "stderr": result.stderr
+})))
+        response = self.client.chat([message],model_parameters=config.model_providers[config.default_provider])
+        # print(response)
+        return response
 if __name__ == "__main__":
     live_software = LiveSoftware(config)
     while(True):
         str = input()
         if str == "exit":
             break
-        elif str == "add method":
-            describetion = input("describetion:")
-            print(live_software.add_method(describetion))
-        elif str == "run code":
-            entry_file = input("entry_file:")
-            args = input("args:")
-            print("results= ", live_software.run_code(entry_file, args))
+        else:
+            response = live_software.request(str)
+            print(response.content)
 
