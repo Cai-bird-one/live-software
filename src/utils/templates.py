@@ -42,7 +42,7 @@ Existing code
 Current design
 You need to update or add new design and code elements to fulfill the new requirements.
 Your response should be in JSON format and must include three keys:
-"design": updated or newly added design descriptions
+"design": updated or newly added design descriptions. it should be a json object where keys are the class/file names and values are the corresponding design descriptions. there should also be a key "__structure__" which describes the overall structure of the code in json format, each key is a class/file name and its value is a list of its attributes and methods.
 "code": a dictionary where keys are the file paths of modified or new Python files, and values are the corresponding full code content
 "usage": a description of how to run the updated code, including usage examples or execution commands
 The final solution must ensure that the entire requirement can be satisfied by running a single Python script, and its return value should be the expected result of the task.
@@ -56,11 +56,12 @@ def request_template(request, state_str):
 I will give you the user's request, along with existing code, design specifications, and usage instructions.
 Based on this, you may either propose a new method or invoke an existing method to fulfill the user's request.
 However, you must accomplish the task by calling existing methods whenever possible.
-Your response must always be in JSON format, and it must include either a "method" key or a "run" key:
+Your response must always be in JSON format, and it must include either a "method" key, "run" key, or a "stop" key:
 The "method" key should be used when a new method needs to be added. Its value must contain a detailed specification of the new method's purpose and functionality.
 The "run" key should be used to invoke an existing method. Its value must be an object that includes:
     "entry_file": the full filename of the script to be executed;
     "args": the list of arguments required to run the script.
+The "stop" key means you don't need to add a method or run any existing code. Its value should be a string that describes the new method's purpose and functionality.
 Always ensure the response format strictly follows this structure to enable automated execution.
 In that case, you must clearly format and present the result to the user.
 Make sure your response strictly follows this structure to ensure successful automated execution.

@@ -57,3 +57,8 @@ class StateManager:
         self.save_design(response["design"])
         self.save_code(response["code"])
         self.save_usage(response["usage"])
+
+    def get_structure(self):
+        design = self.load_design()
+        structure = design["__structure__"]
+        return structure

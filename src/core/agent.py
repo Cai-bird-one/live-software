@@ -9,7 +9,6 @@ import subprocess
 
 config = Config()
 
-
 class LiveSoftware:
     design: str
     code: str
@@ -19,9 +18,8 @@ class LiveSoftware:
     def add_method(self, request):
         message = LLMMessage(role="user", content=add_method_template(request, self.state_manager.state_str()))
         response = self.client.chat([message],model_parameters=config.model_providers[config.default_provider])
-        # print(response)
         response = json.loads(response.content)
-        # print(response)
+        print(response)
         self.state_manager.update(response)
         return response
     def run_code(self, entry_file, args):
@@ -30,7 +28,7 @@ class LiveSoftware:
         message = LLMMessage(role="user", content=request_template(request, self.state_manager.state_str()))
         response = self.client.chat([message],model_parameters=config.model_providers[config.default_provider])
         response = json.loads(response.content)
-        # print(response)
+        print(response)
         if "method" in response:
             self.add_method(response["method"])
         if "run" in response:
@@ -39,6 +37,8 @@ class LiveSoftware:
             results = self.run_code(entry_file, args)
             results = self.get_answer(request, response, results)
             return results
+        elif "stop" in response:
+            return response["stop"]
         else:
             results = self.request(request)
         return results
@@ -51,8 +51,11 @@ class LiveSoftware:
         "stderr": result.stderr
 })))
         response = self.client.chat([message],model_parameters=config.model_providers[config.default_provider])
-        # print(response)
-        return response
+        print(response)
+        return response.content
+    
+    def get_structure(self):
+        return self.state_manager.get_structure()
 if __name__ == "__main__":
     live_software = LiveSoftware(config)
     while(True):
@@ -61,5 +64,6 @@ if __name__ == "__main__":
             break
         else:
             response = live_software.request(str)
-            print(response.content)
+            print(response)
+            print(live_software.get_structure())
 
