@@ -27,11 +27,12 @@ class LiveSoftware:
     def request(self, request):
         message = LLMMessage(role="user", content=request_template(request, self.state_manager.state_str()))
         response = self.client.chat([message],model_parameters=config.model_providers[config.default_provider])
-        response = json.loads(response.content)
         print(response)
+        response = json.loads(response.content)
         if "method" in response:
             self.add_method(response["method"])
-        if "run" in response:
+            return self.request(request)
+        elif "run" in response:
             entry_file = response["run"]["entry_file"]
             args = response["run"]["args"]
             results = self.run_code(entry_file, args)
@@ -39,9 +40,6 @@ class LiveSoftware:
             return results
         elif "stop" in response:
             return response["stop"]
-        else:
-            results = self.request(request)
-        return results
     def get_answer(self, request, response, result):
         message = LLMMessage(role="user", content=get_answer_template(request, self.state_manager.state_str(),
         json.dumps(response["run"]), json.dumps({
@@ -64,6 +62,6 @@ if __name__ == "__main__":
             break
         else:
             response = live_software.request(str)
-            print(response)
+            print("response:", response)
             print(live_software.get_structure())
 
