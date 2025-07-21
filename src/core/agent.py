@@ -17,15 +17,17 @@ class LiveSoftware:
         self.state_manager = StateManager()
     def add_method(self, request):
         message = LLMMessage(role="user", content=add_method_template(request, self.state_manager.state_str()))
+        print(message)
         response = self.client.chat([message],model_parameters=config.model_providers[config.default_provider])
-        response = json.loads(response.content)
         print(response)
+        response = json.loads(response.content)
         self.state_manager.update(response)
         return response
     def run_code(self, entry_file, args):
         return self.state_manager.run_code(entry_file, args)
     def request(self, request):
         message = LLMMessage(role="user", content=request_template(request, self.state_manager.state_str()))
+        print(message)
         response = self.client.chat([message],model_parameters=config.model_providers[config.default_provider])
         print(response)
         response = json.loads(response.content)
@@ -41,13 +43,13 @@ class LiveSoftware:
         elif "stop" in response:
             return response["stop"]
     def get_answer(self, request, response, result):
+        print("!!!result!!!", result)
         message = LLMMessage(role="user", content=get_answer_template(request, self.state_manager.state_str(),
         json.dumps(response["run"]), json.dumps({
-        "args": result.args,
-        "returncode": result.returncode,
         "stdout": result.stdout,
         "stderr": result.stderr
 })))
+        print(message)
         response = self.client.chat([message],model_parameters=config.model_providers[config.default_provider])
         print(response)
         return response.content

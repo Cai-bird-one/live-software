@@ -40,7 +40,7 @@ class StateManager:
             args = args.split(" ")
         cmd = ["python", os.path.join(self.dir, entry_file)] + args
         try:
-            result = subprocess.run(cmd)
+            result = subprocess.run(cmd, capture_output=True, text=True)
             return result
         except subprocess.CalledProcessError as e:
             return e.output
