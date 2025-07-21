@@ -1,0 +1,54 @@
+<!-- 文件路径: src/core/templates/index.html (最终正确版本) -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Software Agent Interface</title>
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <script src="{{ url_for('static', filename='cytoscape.min.js') }}"></script>
+    <script src="https://unpkg.com/dagre@0.8.5/dist/dagre.min.js"></script>
+    <script src="https://unpkg.com/cytoscape-dagre@2.5.0/cytoscape-dagre.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Live Software Agent Interface</h1>
+        </header>
+
+        <div class="main-content">
+            <div id="data-code-area" class="panel">
+                <h2>Data / Code / Result</h2>
+                <pre><code id="code-display">Results will be displayed here.</code></pre>
+            </div>
+            <div id="visualization-area" class="panel">
+                <h2>Graph Visualization</h2>
+                <div class="vis-controls">
+                    <label><input type="radio" name="graph-type" value="node" checked> Node Graph</label>
+                    <label><input type="radio" name="graph-type" value="class"> Class Graph</label>
+                </div>
+                <div id="cy"></div>
+            </div>
+        </div>
+
+        <div id="llm-thought-area" class="panel">
+            <h2>LLM Thought Process</h2>
+            <pre id="thought-display">The agent's thought process will appear here...</pre>
+        </div>
+
+        <div id="terminal-area" class="panel">
+            <h2>User Terminal</h2>
+            <div id="terminal-output"></div>
+            <div class="terminal-input-container">
+                <span>></span>
+                <input type="text" id="terminal-input" placeholder="Type your command and press Enter...">
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
