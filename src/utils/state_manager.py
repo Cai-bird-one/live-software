@@ -15,12 +15,16 @@ class StateManager:
         codes={}
         for file in os.listdir(self.dir):
             if file.endswith(".py"):
-                codes[file]=open(os.path.join(self.dir,file)).read()
+                try:
+                    with open(os.path.join(self.dir, file), 'r', encoding='utf-8') as f:
+                        codes[file]=f.read()
+                except UnicodeDecodeError:
+                    codes[file] = f"# Error reading file {file}: {e}"      
         return codes
     
     def save_code(self, codes):
         for file, code in codes.items():
-            with open(os.path.join(self.dir,file), "w") as f:
+            with open(os.path.join(self.dir,file), "w", encoding='utf-8') as f:
                 f.write(code)
     
     def load_design(self):
@@ -60,5 +64,8 @@ class StateManager:
 
     def get_structure(self):
         design = self.load_design()
-        structure = design["__structure__"]
-        return structure
+        if("__structure__" not in design):
+            return {}
+        else:
+            structure = design["__structure__"]
+            return structure

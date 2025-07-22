@@ -26,22 +26,46 @@ class LiveSoftware:
     def run_code(self, entry_file, args):
         return self.state_manager.run_code(entry_file, args)
     def request(self, request):
-        message = LLMMessage(role="user", content=request_template(request, self.state_manager.state_str()))
-        # print(message)
-        response = self.client.chat([message],model_parameters=config.model_providers[config.default_provider])
-        # print(response)
-        response = json.loads(response.content)
-        if "method" in response:
-            self.add_method(response["method"])
-            return self.request(request)
-        elif "run" in response:
-            entry_file = response["run"]["entry_file"]
-            args = response["run"]["args"]
-            results = self.run_code(entry_file, args)
-            results = self.get_answer(request, response, results)
-            return results
-        elif "stop" in response:
-            return response["stop"]
+        full_response = {
+            "thought": "Starting request processing...",
+            "result": None,
+            "stop_message": None
+        }
+        for _ in range(10):
+            message = LLMMessage(role="user", content=request_template(request, self.state_manager.state_str()))
+            response = self.client.chat([message],model_parameters=config.model_providers[config.default_provider])
+            response = json.loads(response.content)
+
+            # 检查LLM的计划并执行
+            if "method" in response:
+                method_request = response["method"]
+                add_method_response = self.add_method(method_request)
+                current_thought = add_method_response.get("thought", "No thought from add_method.")
+                full_response["thought"] += f"\n\n {json.dumps(current_thought)}"
+                continue
+            elif "run" in response:
+                entry_file = response["run"]["entry_file"]
+                args = response["run"]["args"]
+                results = self.run_code(entry_file, args)
+                results = self.get_answer(request, response, results)
+                print(results)
+                try:
+                    result = json.loads(results)
+                    full_response["result"] = result.get("result", result.get("stop", results))
+                    # final_thought = result.get('thought', 'No final thought.')
+                    # full_response["thought"] += f"\n\nThought for final answer: {json.dumps(final_thought)}"
+                except (json.JSONDecodeError, TypeError):
+                    full_response["result"] = results
+                return full_response
+            elif "stop" in response:
+                full_response["stop_message"] = response["stop"]
+                return full_response
+            else:
+                full_response["thought"] += f"\nError: {response}"
+                full_response["stop_message"] = "Unexcepted stop."
+                return full_response
+        full_response["stop_message"] = "Exceeded maximum steps."
+        return full_response
     def get_answer(self, request, response, result):
         # print("!!!result!!!", result)
         message = LLMMessage(role="user", content=get_answer_template(request, self.state_manager.state_str(),

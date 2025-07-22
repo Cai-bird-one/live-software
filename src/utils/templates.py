@@ -41,7 +41,8 @@ New functional requirements
 Existing code,
 Current design,
 You need to update or add new design and code elements to fulfill the new requirements.
-Your response should be in JSON format and must include three keys:
+Your response should be in JSON format and must include four keys:
+"thought": A step-by-step plan of what you are about to do.
 "design": updated or newly added design descriptions. it should be a json object where keys are the class/file names and values are the corresponding design descriptions. there should also be a key "__structure__" which describes the overall structure of the code in json format, each key is a class/file name and its value is a list of its attributes and methods.
 "code": a dictionary where keys are the file paths of modified or new Python files, and values are the corresponding full code content
 "usage": a description of how to run the updated code, including usage examples or execution commands
