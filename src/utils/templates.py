@@ -41,8 +41,8 @@ New functional requirements, Existing code, Current design,
 You need to update or add new design and code elements to fulfill the new requirements.
 Your response should be in JSON format and must include four keys:
 "thought": A step-by-step plan of what you are about to do.
-"design": updated or newly added design descriptions. it should be a json object where keys are the class/file names and values are the corresponding design descriptions. there should also be a key "__structure__" which describes the overall structure of the code in json format, each key is a class/file name and its value is a list of its attributes and methods. Ensure compliance with software design principles
-"code": a dictionary where keys are the file paths of modified or new Python files, and values are the corresponding full code content, don't require packages that need to be installed.
+"design": updated or newly added design descriptions. it should be a json object where keys are the class/file names and values are the corresponding design descriptions. there should also be a key "__structure__" which describes the overall structure of the code in json format, each key is a class/file name and its value is a list of its attributes and methods or files it relies. Ensure compliance with software design principles
+"code": a dictionary where keys are the file paths of modified or new Python files, and values are the corresponding full code content, don't require any packages or modules like "numpy" that need to be installed.
 "usage": a description of how to run the updated code, including usage examples or execution commands
 The final solution must ensure that the entire requirement can be satisfied by running a single Python script, and its return value should be the expected result of the task.
 If the user ask you to save any data, you should save it in a file or database, allowing it can be accessed later.
@@ -75,7 +75,7 @@ def get_answer_template(request, state_str, command, result):
 I will provide you with: the user's request, existing code and design specifications, usage instructions, the command that was invoked, and the result obtained.
 Your job is to analyze the obtained result and formulate a clear and informative response to the user.
 If the input contains a "result" key, this indicates the output from the executed code.
-You must parse and present the result in a clear, concise, and user-friendly way as a string.
+You must parse and present the result in a clear, concise, and user-friendly way as a string to response the user's request.
 Request: {request}
 Current state: {state_str}
 Command: {command}

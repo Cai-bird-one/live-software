@@ -14,15 +14,19 @@ class LiveSoftware:
     code: str
     def __init__(self, config):
         self.client = LLMClient(config.default_provider, config.model_providers[config.default_provider])
+        self.request_client = LLMClient(config.default_provider, config.model_providers[config.default_provider])
         self.state_manager = StateManager()
     def add_method(self, request):
-        message = LLMMessage(role="user", content=add_method_template(request, self.state_manager.state_str()))
-        print("message: ", message)
-        response = self.client.chat([message],model_parameters=config.model_providers[config.default_provider], reuse_history=False)
-        print("response: ", response)
-        response = json.loads(response.content)
-        self.state_manager.update(response)
-        return response
+        try:
+            message = LLMMessage(role="user", content=add_method_template(request, self.state_manager.state_str()))
+            print("message: ", message)
+            response = self.client.chat([message],model_parameters=config.model_providers[config.default_provider], reuse_history=False)
+            print("response: ", response)
+            response = json.loads(response.content)
+            self.state_manager.update(response)
+            return response
+        except Exception as e:
+            return e
     def run_code(self, entry_file, args):
         return self.state_manager.run_code(entry_file, args)
     def request(self, request):
@@ -34,7 +38,7 @@ class LiveSoftware:
         for _ in range(10):
             message = LLMMessage(role="user", content=request_template(request, self.state_manager.state_str()))
             print("message: ", message)
-            response = self.client.chat([message],model_parameters=config.model_providers[config.default_provider])
+            response = self.request_client.chat([message],model_parameters=config.model_providers[config.default_provider])
             print("response: ", response)
             response = json.loads(response.content)
             # 检查LLM的计划并执行

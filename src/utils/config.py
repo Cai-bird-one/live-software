@@ -69,11 +69,11 @@ class Config:
         if len(self._config.get("model_providers", [])) == 0:
             self.model_providers = {
                 "openai": ModelParameters(
-                    model="o4-mini",
+                    model="o3",
                     api_key="sk-hL9Tj3YF6IeZlVDy3cD0843d3e734bD1915171F3C6B5851c",
                     base_url="https://aihubmix.com/v1",
-                    max_tokens=4096,
-                    temperature=0.5,
+                    max_tokens=32768,
+                    temperature=0,
                     top_p=1,
                     top_k=0,
                     parallel_tool_calls=False,

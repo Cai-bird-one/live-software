@@ -42,6 +42,8 @@ class StateManager:
     def run_code(self, entry_file, args):
         if args is str:
             args = args.split(" ")
+        for value in args:
+            value= str(value)
         cmd = ["python", os.path.join(self.dir, entry_file)] + args
         try:
             result = subprocess.run(cmd, capture_output=True, text=True)
