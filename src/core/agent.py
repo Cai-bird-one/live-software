@@ -17,9 +17,9 @@ class LiveSoftware:
         self.state_manager = StateManager()
     def add_method(self, request):
         message = LLMMessage(role="user", content=add_method_template(request, self.state_manager.state_str()))
-        # print(message)
+        print("message: ", message)
         response = self.client.chat([message],model_parameters=config.model_providers[config.default_provider], reuse_history=False)
-        # print(response)
+        print("response: ", response)
         response = json.loads(response.content)
         self.state_manager.update(response)
         return response
@@ -33,9 +33,10 @@ class LiveSoftware:
         }
         for _ in range(10):
             message = LLMMessage(role="user", content=request_template(request, self.state_manager.state_str()))
+            print("message: ", message)
             response = self.client.chat([message],model_parameters=config.model_providers[config.default_provider])
+            print("response: ", response)
             response = json.loads(response.content)
-
             # 检查LLM的计划并执行
             if "method" in response:
                 method_request = response["method"]
@@ -74,9 +75,9 @@ class LiveSoftware:
         "stdout": result.stdout,
         "stderr": result.stderr
 })))
-        # print(message)
+        print("message: ", message)
         response = self.client.chat([message],model_parameters=config.model_providers[config.default_provider], reuse_history=False)
-        # print(response)
+        print("response: ", response)
         return response.content
     
     def get_structure(self):

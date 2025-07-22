@@ -37,14 +37,12 @@ def modify_code_template(designs, codes, request):
 def add_method_template(request, state_str):
     return f"""You are an AI software engineering agent. Your task is to maintain and extend Python code based on given requirements.
 I will provide you with:
-New functional requirements
-Existing code,
-Current design,
+New functional requirements, Existing code, Current design,
 You need to update or add new design and code elements to fulfill the new requirements.
 Your response should be in JSON format and must include four keys:
 "thought": A step-by-step plan of what you are about to do.
-"design": updated or newly added design descriptions. it should be a json object where keys are the class/file names and values are the corresponding design descriptions. there should also be a key "__structure__" which describes the overall structure of the code in json format, each key is a class/file name and its value is a list of its attributes and methods.
-"code": a dictionary where keys are the file paths of modified or new Python files, and values are the corresponding full code content
+"design": updated or newly added design descriptions. it should be a json object where keys are the class/file names and values are the corresponding design descriptions. there should also be a key "__structure__" which describes the overall structure of the code in json format, each key is a class/file name and its value is a list of its attributes and methods. Ensure compliance with software design principles
+"code": a dictionary where keys are the file paths of modified or new Python files, and values are the corresponding full code content, don't require packages that need to be installed.
 "usage": a description of how to run the updated code, including usage examples or execution commands
 The final solution must ensure that the entire requirement can be satisfied by running a single Python script, and its return value should be the expected result of the task.
 If the user ask you to save any data, you should save it in a file or database, allowing it can be accessed later.
@@ -59,11 +57,11 @@ I will give you the user's request, along with existing code, design specificati
 Based on this, you may either propose a new method or invoke an existing method to fulfill the user's request.
 However, you must accomplish the task by calling existing methods whenever possible.
 Your response must always be in JSON format, and it must include either a "method" key, "run" key, or a "stop" key:
-The "method" key should be used when a new method needs to be added. Its value must contain a detailed specification of the new method's purpose and functionality.
+The "method" key should be used when a new method needs to be added. Ensure compliance with software design principles
 The "run" key should be used to invoke an existing method. Its value must be an object that includes:
     "entry_file": the full filename of the script to be executed;
     "args": the list of arguments required to run the script.
-The "stop" key means the user has requested to add some methods and the methods already exist, so you can stop the conversation.
+The "stop" key only means the user has just requested to add some methods and the methods already exist, so you can stop the conversation.
 Always ensure the response format strictly follows this structure to enable automated execution.
 In that case, you must clearly format and present the result to the user.
 Make sure your response strictly follows this structure to ensure successful automated execution.

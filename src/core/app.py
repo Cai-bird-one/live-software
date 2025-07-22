@@ -21,6 +21,7 @@ def handle_request():
         response = live_software.request(user_message)
         return jsonify(response)
     except Exception as e:
+        print(str(e))
         return jsonify({"error": str(e)}), 500
 
 @app.route('/api/structure', methods=['GET'])
