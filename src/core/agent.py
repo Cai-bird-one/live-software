@@ -17,9 +17,9 @@ class LiveSoftware:
         self.state_manager = StateManager()
     def add_method(self, request):
         message = LLMMessage(role="user", content=add_method_template(request, self.state_manager.state_str()))
-        print(message)
-        response = self.client.chat([message],model_parameters=config.model_providers[config.default_provider])
-        print(response)
+        # print(message)
+        response = self.client.chat([message],model_parameters=config.model_providers[config.default_provider], reuse_history=False)
+        # print(response)
         response = json.loads(response.content)
         self.state_manager.update(response)
         return response
@@ -27,9 +27,9 @@ class LiveSoftware:
         return self.state_manager.run_code(entry_file, args)
     def request(self, request):
         message = LLMMessage(role="user", content=request_template(request, self.state_manager.state_str()))
-        print(message)
+        # print(message)
         response = self.client.chat([message],model_parameters=config.model_providers[config.default_provider])
-        print(response)
+        # print(response)
         response = json.loads(response.content)
         if "method" in response:
             self.add_method(response["method"])
@@ -43,15 +43,16 @@ class LiveSoftware:
         elif "stop" in response:
             return response["stop"]
     def get_answer(self, request, response, result):
-        print("!!!result!!!", result)
+        # print("!!!result!!!", result)
         message = LLMMessage(role="user", content=get_answer_template(request, self.state_manager.state_str(),
         json.dumps(response["run"]), json.dumps({
+        "returncode": result.returncode,
         "stdout": result.stdout,
         "stderr": result.stderr
 })))
-        print(message)
-        response = self.client.chat([message],model_parameters=config.model_providers[config.default_provider])
-        print(response)
+        # print(message)
+        response = self.client.chat([message],model_parameters=config.model_providers[config.default_provider], reuse_history=False)
+        # print(response)
         return response.content
     
     def get_structure(self):
@@ -65,5 +66,5 @@ if __name__ == "__main__":
         else:
             response = live_software.request(str)
             print("response:", response)
-            print(live_software.get_structure())
+            print("structure:", live_software.get_structure())
 
