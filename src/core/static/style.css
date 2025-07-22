@@ -1,7 +1,7 @@
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    background-color: #1a1a1a;
-    color: #e0e0e0;
+    background-color: #eaf6ff; /* Light blue page background */
+    color: #24292e; /* Dark text for readability */
     margin: 0;
     padding: 0;
 }
@@ -11,11 +11,10 @@ body {
     grid-template-areas:
         "header header"
         "main-content main-content"
-        "llm-thought llm-thought"
         "terminal terminal";
-    grid-template-rows: auto 1fr auto auto;
+    grid-template-rows: auto 1fr auto;
     grid-template-columns: 1fr 1fr;
-    min-height: 100vh; /* 使用 min-height 以允许内容扩展 */
+    min-height: 100vh;
     gap: 15px;
     padding: 15px;
     box-sizing: border-box;
@@ -24,8 +23,9 @@ body {
 header {
     grid-area: header;
     text-align: center;
-    border-bottom: 2px solid #444;
+    border-bottom: 2px solid #cce0ff;
     padding-bottom: 10px;
+    color: #005a9c;
 }
 
 .main-content {
@@ -33,7 +33,7 @@ header {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 15px;
-    min-height: 45vh; /* 增加了最小高度 */
+    min-height: 55vh;
 }
 
 #data-code-area {
@@ -46,62 +46,62 @@ header {
     flex-direction: column;
 }
 
-#llm-thought-area {
-    grid-area: llm-thought;
-    min-height: 25vh; /* 增加了最小高度 */
-}
-
 #terminal-area {
     grid-area: terminal;
-    min-height: 30vh; /* 增加了最小高度 */
+    min-height: 30vh;
 }
 
 .panel {
-    background-color: #282c34;
-    border: 1px solid #444;
+    background-color: #d4eaff; /* Deeper light blue for panels */
+    border: 1px solid #b0c4de; /* LightSteelBlue border */
     border-radius: 8px;
     padding: 15px;
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* 防止内容溢出 */
+    overflow: hidden;
 }
 
 .panel h2 {
     margin-top: 0;
-    color: #61afef;
-    border-bottom: 1px solid #444;
+    color: #307bb1; /* A strong, dark blue for headings */
+    border-bottom: 1px solid #b0c4de;
     padding-bottom: 8px;
 }
 
-/* MODIFIED THIS RULE */
 pre {
-    background-color: #21252b;
-    padding: 10px;
-    border-radius: 5px;
+    background-color: #f5f2f0; /* A nice, slightly warm off-white background for code */
+    padding: 16px;
+    border-radius: 6px;
     white-space: pre-wrap;
     word-wrap: break-word;
-    overflow-y: auto; /* Ensures a vertical scrollbar appears when content overflows */
-    flex-grow: 1; /* 占据剩余空间 */
-    color: #abb2bf;
-    font-family: 'Fira Code', 'Courier New', Courier, monospace;
-    /* ADDED THIS LINE to guarantee a scrollbar appears for long code */
-    max-height: 38vh;
+    overflow-y: auto;
+    flex-grow: 1;
+    font-family: 'Fira Code', Consolas, 'Courier New', monospace;
+    font-size: 1.1em;
+    border: 1px solid #d0d7de; 
+    line-height: 1.5;
 }
 
-code {
-    font-size: 0.9em;
+/* Add this rule to set the language class needed by Prism.js */
+pre > code {
+    font-size: 1em; /* Inherit from pre */
+    background: none;
+    padding: 0;
+    border: none;
 }
 
 #cy {
     flex-grow: 1;
     width: 100%;
     height: 100%;
-    background-color: #21252b;
+    background-color: #f8faff; /* Same very light background for the graph */
     border-radius: 5px;
+    border: 1px solid #cce0ff;
 }
 
 .vis-controls {
     margin-bottom: 10px;
+    color: #333;
 }
 
 #terminal-output {
@@ -113,13 +113,13 @@ code {
 .terminal-input-container {
     display: flex;
     align-items: center;
-    border-top: 1px solid #444;
+    border-top: 1px solid #b0c4de;
     padding-top: 10px;
 }
 
 .terminal-input-container span {
     margin-right: 8px;
-    color: #98c379;
+    color: #005a9c; /* Strong blue prompt */
     font-weight: bold;
 }
 
@@ -127,9 +127,9 @@ code {
     width: 100%;
     background: none;
     border: none;
-    color: #e0e0e0;
-    font-size: 1em;
-    font-family: 'Fira Code', 'Courier New', Courier, monospace;
+    color: #111;
+    font-size: 1.1em;
+    font-family: 'Fira Code', Consolas, 'Courier New', monospace;
 }
 
 #terminal-input:focus {
@@ -138,21 +138,23 @@ code {
 
 .terminal-line {
     margin-bottom: 5px;
+    font-family: 'Fira Code', Consolas, 'Courier New', monospace;
+    font-size: 1.1em;
 }
 
 .user-command {
-    color: #98c379;
+    color: #006400; /* Dark green */
 }
 
 .system-response {
-    color: #c678dd;
+    color: #555; /* Dark grey */
 }
 
 .error-response {
-    color: #e06c75;
+    color: #c00; /* Dark red */
 }
 
 .loading {
-    color: #e5c07b; 
+    color: #e36209; /* Dark orange */
     font-style: italic;
 }

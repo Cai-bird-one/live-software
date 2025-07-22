@@ -4,7 +4,7 @@ import shutil
 import subprocess
 class StateManager:
     def __init__(self):
-        self.dir="/home/birdcly/live software/codes"
+        self.dir="D:\envolve-software\live software\codes"
         # 清空 self.dir
         shutil.rmtree(self.dir)
         os.mkdir(self.dir)

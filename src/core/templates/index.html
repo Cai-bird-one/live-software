@@ -1,14 +1,12 @@
-<!-- 文件路径: src/core/templates/index.html (最终正确版本) -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Software Agent Interface</title>
+    <title>Self-Evolving Software</title>
     
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
     <script src="{{ url_for('static', filename='cytoscape.min.js') }}"></script>
     <script src="https://unpkg.com/dagre@0.8.5/dist/dagre.min.js"></script>
     <script src="https://unpkg.com/cytoscape-dagre@2.5.0/cytoscape-dagre.js"></script>
@@ -16,13 +14,13 @@
 <body>
     <div class="container">
         <header>
-            <h1>Live Software Agent Interface</h1>
+            <h1>Self-Evolving Software</h1>
         </header>
 
         <div class="main-content">
             <div id="data-code-area" class="panel">
                 <h2>Data / Code / Result</h2>
-                <pre><code id="code-display">Results will be displayed here.</code></pre>
+                <pre><code id="code-display" class="language-python">Results will be displayed here.</code></pre>
             </div>
             <div id="visualization-area" class="panel">
                 <h2>Graph Visualization</h2>
@@ -32,11 +30,6 @@
                 </div>
                 <div id="cy"></div>
             </div>
-        </div>
-
-        <div id="llm-thought-area" class="panel">
-            <h2>LLM Thought Process</h2>
-            <pre id="thought-display">The agent's thought process will appear here...</pre>
         </div>
 
         <div id="terminal-area" class="panel">
@@ -49,6 +42,10 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+    
 </body>
 </html>

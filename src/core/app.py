@@ -43,16 +43,20 @@ def get_structure():
         filtered_methods = []
         main_method_exists = False
         for method_str in methods:
-            if "__main__" in method_str:
+            if "main" in method_str:
                 if not main_method_exists:
                     filtered_methods.append("main()")
                     main_method_exists = True
             elif method_str not in filtered_methods:
-                 filtered_methods.append(method_str)
+                filtered_methods.append(method_str)
+        all_method_name = []
         for method_str in filtered_methods:
             method_name = method_str.split('(')[0].strip()
             if not method_name:
-                continue            
+                continue
+            if method_name in all_method_name:
+                continue
+            all_method_name.append(method_name)
             method_node_id = f"{method_name}"
             nodes.append({"data": {"id": method_node_id, "label": method_name}})
             edges.append({"data": {"source": str(node_id), "target": method_node_id}})
@@ -63,7 +67,6 @@ def get_structure():
                 continue
             nodes.append({"data": {"id": str(file_name), "label": str(file_name)}})
             edges.append({"data": {"source": "Meta", "target": str(file_name)}})
-
     elements = {"nodes": nodes, "edges": edges}
     return jsonify({"elements": elements})
 

@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const terminalInput = document.getElementById('terminal-input');
     const terminalOutput = document.getElementById('terminal-output');
     const codeDisplay = document.getElementById('code-display');
-    const thoughtDisplay = document.getElementById('thought-display');
     const cyContainer = document.getElementById('cy');
     
     let previousGraphElements = null;
@@ -19,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'shape': 'rectangle',
                     'background-color': 'data(color)',
                     'label': 'data(label)',
-                    'color': '#e0e0e0',
+                    'color': '#111', // Dark text for light background
                     'text-valign': 'center',
                     'text-halign': 'center',
                     'font-size': '10px',
@@ -27,21 +26,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     'text-max-width': '80px',
                     'width': 'label',
                     'height': 'label',
-                    'padding': '10px'
+                    'padding': '10px',
+                    'border-width': 1,
+                    'border-color': '#ccc'
                 }
             },
             {
                 selector: 'edge',
                 style: {
                     'width': 1.5,
-                    'line-color': '#b1ea62ff',
-                    'target-arrow-color': '#b1ea62ff',
+                    'line-color': '#666', // Darker line color
+                    'target-arrow-color': '#666', // Darker arrow color
                     'target-arrow-shape': 'triangle',
                     'curve-style': 'bezier'
                 }
             }
         ],
-        // **FIXED**: Set default layout to dagre for horizontal flow
         layout: {
             name: 'dagre',
             rankDir: 'LR', // Left-to-Right
@@ -49,7 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- 事件监听 ---
     terminalInput.addEventListener('keydown', (event) => {
         if (event.key === 'Enter' && terminalInput.value.trim() !== '') {
             const command = terminalInput.value.trim();
@@ -59,22 +58,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // **MODIFIED**: New click handler logic
     cy.on('tap', 'node', (event) => {
         const node = event.target;
         const nodeId = node.id();
 
-        // If in 'class' view, do nothing as requested.
         if (currentGraphType === 'class') {
             return;
         }
 
-        // If in 'node' view and a file node (not Meta) is clicked
         if (currentGraphType === 'node' && nodeId !== 'Meta' && nodeId.substring(nodeId.length - 3) === '.py' ) {
-            // 1. Fetch and display the code for the clicked file node
             fetchCode(nodeId);
-
-            // 2. Switch radio to class graph and update the graph view
             document.querySelector('input[name="graph-type"][value="class"]').checked = true;
             updateGraph('class', nodeId);
         }
@@ -88,7 +81,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- 主要功能函数 ---
     const handleCommand = (command) => {
         const parts = command.split(/\s+/);
         if (parts[0].toLowerCase() === 'code_get' && parts.length > 1) {
@@ -101,7 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const fetchCode = async (nodeId) => {
-        // Ensure we fetch code for the file, not a method-specific ID
         const fileNodeId = nodeId.split('-')[0];
         appendToTerminal(`Fetching code for: ${fileNodeId}...`, 'system-response');
         try {
@@ -117,6 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.error) throw new Error(data.error);
 
             codeDisplay.textContent = data.code;
+            Prism.highlightElement(codeDisplay);
             appendToTerminal(`Code for ${fileNodeId} loaded successfully.`, 'system-response');
         } catch (error) {
             appendToTerminal(`Error fetching code: ${error.message}`, 'error-response');
@@ -127,7 +119,6 @@ document.addEventListener('DOMContentLoaded', () => {
         appendToTerminal('Agent is processing your request...', 'system-response loading');
         terminalInput.disabled = true;
 
-        thoughtDisplay.textContent = 'Agent is thinking...';
         codeDisplay.textContent = 'Waiting for result...';
 
         try {
@@ -142,9 +133,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.error) throw new Error(data.error);
             
             removeLoadingMessage();
-            thoughtDisplay.textContent = data.thought || 'No thought process was provided.';
             const resultText = data.result || data.stop_message || 'The agent did not produce a result.';
             codeDisplay.textContent = resultText;
+            Prism.highlightElement(codeDisplay);
             appendToTerminal(resultText, 'system-response');
             appendToTerminal('Agent processing complete.', 'system-response');
 
@@ -154,8 +145,8 @@ document.addEventListener('DOMContentLoaded', () => {
             removeLoadingMessage();
             const errorMessage = `Error processing message: ${error.message}`;
             appendToTerminal(errorMessage, 'error-response');
-            thoughtDisplay.textContent = errorMessage;
             codeDisplay.textContent = 'An error occurred.';
+            Prism.highlightElement(codeDisplay);
         } finally {
             terminalInput.disabled = false;
             terminalInput.focus();
@@ -163,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const updateGraph = async (graphType = 'node', nodeId = null) => {
-        currentGraphType = graphType; // Update state
+        currentGraphType = graphType;
         try {
             let url = `${API_BASE_URL}/structure?type=${graphType}`;
             if (nodeId) {
@@ -182,15 +173,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     : new Set();
 
                 currentElements.nodes.forEach(node => {
-                    node.data.color = '#61afef'; 
+                    node.data.color = '#a9d4ff'; // Main node color (blue)
                     if (!prevNodeIds.has(node.data.id)) {
-                        node.data.color = '#ff69b4'; // Pink
+                        node.data.color = '#ffc0cb'; // New node color (red)
                     }
                 });
 
                 cy.elements().remove();
                 cy.add(currentElements);
-                // **FIXED**: Ensure dagre layout is used for every update
                 cy.layout({ name: 'dagre', rankDir: 'LR', spacingFactor: 1.25 }).run();
                 
                 previousGraphElements = JSON.stringify(currentElements);
@@ -200,7 +190,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // --- 辅助函数 ---
     const appendToTerminal = (text, className) => {
         const line = document.createElement('div');
         line.innerHTML = text.replace(/\n/g, '<br>');
@@ -217,9 +206,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // --- 初始化 ---
     const initialize = () => {
-        appendToTerminal('Welcome to the Live Software Agent Interface.', 'system-response');
+        appendToTerminal('Welcome to the Self-Evolving Software Interface.', 'system-response');
         appendToTerminal('You can type a request or use "code_get <node_id>".', 'system-response');
         updateGraph('node');
         terminalInput.focus();
