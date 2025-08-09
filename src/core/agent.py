@@ -1,11 +1,9 @@
 from ..utils.config import Config
 from ..llm.llm_client import LLMClient
 from ..llm.llm_basics import LLMMessage, LLMResponse
-from ..utils.templates import add_method_template, request_template, get_answer_template
-from ..utils.running import run_local_code_in_docker
+from ..utils.prompts import add_method_prompt, request_prompt
 from ..utils.state_manager import StateManager
 import json
-import subprocess
 
 config = Config()
 
@@ -13,57 +11,88 @@ class LiveSoftware:
     design: str
     code: str
     def __init__(self, config):
-        self.client = LLMClient(config.default_provider, config.model_providers[config.default_provider])
         self.request_client = LLMClient(config.default_provider, config.model_providers[config.default_provider])
+        initial_messages = []
+        initial_messages.append(LLMMessage(role="system", content=request_prompt))
+        self.request_client.set_chat_history(initial_messages)
         self.state_manager = StateManager()
-    def add_method(self, request):
-        try:
-            message = LLMMessage(role="user", content=add_method_template(request, self.state_manager.state_str()))
-            print("message: ", message)
-            response = self.client.chat([message],model_parameters=config.model_providers[config.default_provider], reuse_history=False)
-            print("response: ", response)
-            response = json.loads(response.content)
-            self.state_manager.update(response)
-            return response
-        except Exception as e:
-            return e
+    def add_method(self, description):
+        client = LLMClient(config.default_provider, config.model_providers[config.default_provider])
+        initial_messages = []
+        initial_messages.append(LLMMessage(role="system", content=add_method_prompt + f"Description: {description}"))
+        client.set_chat_history(initial_messages)
+
+        message = LLMMessage(role="user", content=f"Code structure: {self.state_manager.get_structure_str()}")
+        for _ in range(20):
+            response = client.chat([message], model_parameters=config.model_providers[config.default_provider])
+            try:
+                content = json.loads(response.content)
+            except json.JSONDecodeError:
+                return False
+            if "operation" not in content:
+                return False
+            if content["operation"] == "query":
+                if content["file_path"] is None:
+                    return False
+                code = self.state_manager.read_code(content["file_path"])
+                message = LLMMessage(role="user", content=f"Code: {code}")
+            elif content["operation"] == "install":
+                if content["package_name"] is None:
+                    message = LLMMessage(role="user", content=f"Error: Invalid package name.")
+                else:
+                    result = self.state_manager.install_package(content["package_name"])
+                    message = LLMMessage(role="user", content=f"Install result: {result}")
+            elif content["operation"] == "modify":
+                if content["file_path"] is None or content["code"] is None or content["description"] is None:
+                    return False
+                print("!!!")
+                success = self.state_manager.update_code(
+                    content["file_path"],
+                    content["code"],
+                    content.get("classes", []),
+                    content.get("functions", []),
+                    content.get("requirements", []),
+                    content["description"]
+                )
+                if not success:
+                    return False
+                message = LLMMessage(role="user", content=f"Code updated successfully: {content['file_path']}, now the new structure is: {self.state_manager.get_structure_str()}")
+            elif content["operation"] == "stop":
+                break
+        return True
+
     def run_code(self, entry_file, args):
         return self.state_manager.run_code(entry_file, args)
-    def request(self, request):
+    def request(self, requirement):
         full_response = {
             "thought": "Starting request processing...",
             "result": None,
             "stop_message": None
         }
+        message = LLMMessage(role="user", content=f"User Requirement: {requirement}")
         for _ in range(10):
-            message = LLMMessage(role="user", content=request_template(request, self.state_manager.state_str()))
-            print("message: ", message)
-            response = self.request_client.chat([message],model_parameters=config.model_providers[config.default_provider])
-            print("response: ", response)
-            response = json.loads(response.content)
+            response = self.request_client.chat([message], model_parameters=config.model_providers[config.default_provider])
+            try:
+                content = json.loads(response.content)
+            except json.JSONDecodeError:
+                return {"thought": "Error: Invalid response format.", "stop_message": "Invalid response format."}
+            if "operation" not in content:
+                return {"thought": "Error: Invalid response format.", "stop_message": "Invalid response format."}
             # 检查LLM的计划并执行
-            if "method" in response:
-                method_request = response["method"]
-                add_method_response = self.add_method(method_request)
-                current_thought = add_method_response.get("thought", "No thought from add_method.")
-                full_response["thought"] += f"\n\n {json.dumps(current_thought)}"
-                continue
-            elif "run" in response:
-                entry_file = response["run"]["entry_file"]
-                args = response["run"]["args"]
-                results = self.run_code(entry_file, args)
-                results = self.get_answer(request, response, results)
-                print(results)
-                try:
-                    result = json.loads(results)
-                    full_response["result"] = result.get("result", result.get("stop", results))
-                    # final_thought = result.get('thought', 'No final thought.')
-                    # full_response["thought"] += f"\n\nThought for final answer: {json.dumps(final_thought)}"
-                except (json.JSONDecodeError, TypeError):
-                    full_response["result"] = results
-                return full_response
-            elif "stop" in response:
-                full_response["stop_message"] = response["stop"]
+            if content["operation"] == "add":
+                description = content.get("description", "")
+                if not self.add_method(description):
+                    message = LLMMessage(role="user", content=f"Error: Failed to add method for requirement. Now the new structure is: {self.state_manager.get_structure_str()}")
+                else:
+                    message = LLMMessage(role="user", content=f"Method added successfully. Now the new structure is: {self.state_manager.get_structure_str()}")
+            elif content["operation"] == "run":
+                entry_file = content["entry_file"]
+                args = content["args"]
+                result = self.run_code(entry_file, args)
+                message = LLMMessage(role="user", content=f"Return code: {result.returncode}, stdout: {result.stdout}, stderr: {result.stderr}")
+            elif content["operation"] == "answer":
+                full_response["result"] = content["result"]
+                full_response["stop_message"] = "User answered."
                 return full_response
             else:
                 full_response["thought"] += f"\nError: {response}"
@@ -71,19 +100,7 @@ class LiveSoftware:
                 return full_response
         full_response["stop_message"] = "Exceeded maximum steps."
         return full_response
-    def get_answer(self, request, response, result):
-        # print("!!!result!!!", result)
-        message = LLMMessage(role="user", content=get_answer_template(request, self.state_manager.state_str(),
-        json.dumps(response["run"]), json.dumps({
-        "returncode": result.returncode,
-        "stdout": result.stdout,
-        "stderr": result.stderr
-})))
-        print("message: ", message)
-        response = self.client.chat([message],model_parameters=config.model_providers[config.default_provider], reuse_history=False)
-        print("response: ", response)
-        return response.content
-    
+
     def get_structure(self):
         return self.state_manager.get_structure()
 if __name__ == "__main__":

@@ -122,7 +122,8 @@ class OpenAIClient(BaseLLMClient):
         #         provider="openai",
         #         model=model_parameters.model,
         #     )
-
+        print(f"Messages: {messages}")
+        print(f"OpenAI response: {content}")
         return llm_response
 
     def parse_messages(self, messages: list[LLMMessage]) -> ResponseInputParam:
