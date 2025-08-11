@@ -11,7 +11,7 @@ In order to add a new method, you can do the following things, and your response
 - a key "code" with the new code content that will be written to the file path.
 - a key "classes" with a list of classes in the code, each class containing: a key "name" for the class name, a key "members" for a list of the class members' names, and a key "methods" for the class methods' names.
 - a key "functions" with a list of the functions' names.
-- a key "requirments" with a list of the packages or modules required by the code, each element should be the name of the package or module/file path.
+- a key "dependencies" with a list of the packages or modules required by the code, each element should be the name of the package or module/file path.
 - a key "description" with a description of the whole code, including the purpose, the design, and the usage.
 4. stop. You have completed your task and want to stop the conversation. value of the key "operation" should be "stop".
 You need to ensure that the code structure is compliant with software design principles, make each class or file small. Make sure the method can be invoked in cli. You can requre local files or modules if needed.

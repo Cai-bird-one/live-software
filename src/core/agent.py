@@ -51,7 +51,7 @@ class LiveSoftware:
                     content["code"],
                     content.get("classes", []),
                     content.get("functions", []),
-                    content.get("requirements", []),
+                    content.get("dependencies", []),
                     content["description"]
                 )
                 if not success:

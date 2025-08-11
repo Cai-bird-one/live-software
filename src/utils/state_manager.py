@@ -8,11 +8,23 @@ def check_file(file_name):
 class StateManager:
     def __init__(self):
         self.dir="/home/birdcly/live-software/codes"
+        self.structure_path="home/birdcly/live-software/structure.json"
         # 清空 self.dir
         if os.path.exists(self.dir):
             shutil.rmtree(self.dir)
         os.mkdir(self.dir)
         self.structure= {"type":"dir", "children": {}}
+        self.save_structure()
+
+    def save_structure(self):
+        with open(self.structure_path, "w") as f:
+            json.dump(self.structure, f, indent=4)
+    
+    def load_structure(self):
+        if not os.path.exists(self.structure_path):
+            return
+        with open(self.structure_path, "r") as f:
+            self.structure = json.load(f)
 
     def find_path(self, file_path):
         now = self.structure
@@ -32,19 +44,20 @@ class StateManager:
             else:
                 now["type"] = "dir"
         return None
-    def update_code(self, file_path, code, classes, functions, requirements, description):
+    def update_code(self, file_path, code, classes, functions, dependencies, description):
         data = self.find_path(file_path)
         if data is None:
             return False
         data["classes"] = classes
         data["functions"] = functions
-        data["requirements"] = requirements
+        data["dependencies"] = dependencies
         data["description"] = description
         path = os.path.join(self.dir, file_path)
         print("path: ", path)
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w") as f:
             f.write(code)
+        self.save_structure()
         return True
 
     def read_code(self, file_path):
