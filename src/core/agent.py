@@ -45,7 +45,6 @@ class LiveSoftware:
             elif content["operation"] == "modify":
                 if content["file_path"] is None or content["code"] is None or content["description"] is None:
                     return False
-                print("!!!")
                 success = self.state_manager.update_code(
                     content["file_path"],
                     content["code"],

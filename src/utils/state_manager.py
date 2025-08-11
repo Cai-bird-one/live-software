@@ -8,12 +8,13 @@ def check_file(file_name):
 class StateManager:
     def __init__(self):
         self.dir="/home/birdcly/live-software/codes"
-        self.structure_path="home/birdcly/live-software/structure.json"
+        self.structure_path="/home/birdcly/live-software/structure.json"
         # 清空 self.dir
         if os.path.exists(self.dir):
             shutil.rmtree(self.dir)
         os.mkdir(self.dir)
         self.structure= {"type":"dir", "children": {}}
+        os.makedirs(os.path.dirname(self.structure_path), exist_ok=True)
         self.save_structure()
 
     def save_structure(self):
@@ -53,7 +54,6 @@ class StateManager:
         data["dependencies"] = dependencies
         data["description"] = description
         path = os.path.join(self.dir, file_path)
-        print("path: ", path)
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w") as f:
             f.write(code)

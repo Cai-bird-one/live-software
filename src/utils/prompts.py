@@ -8,7 +8,7 @@ In order to add a new method, you can do the following things, and your response
 2. install. Install a new package or module. value of the key "operation" should be "install" and your response must include a key "package_name" with the name of the package or module to be installed.
 3. modify. Modify an existing code file or add a new code file. value of the key "operation" should be "modify" and your response must include:
 - a key "file_path" with the value of the relative file path, means the file that needs to be modified or added.
-- a key "code" with the new code content that will be written to the file path.
+- a key "code" with the new code content that will be written to the file path without any extra characters lick "```" or "```python".
 - a key "classes" with a list of classes in the code, each class containing: a key "name" for the class name, a key "members" for a list of the class members' names, and a key "methods" for the class methods' names.
 - a key "functions" with a list of the functions' names.
 - a key "dependencies" with a list of the packages or modules required by the code, each element should be the name of the package or module/file path.

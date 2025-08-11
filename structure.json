@@ -1,0 +1,128 @@
+{
+    "type": "dir",
+    "children": {
+        "weather_cli.py": {
+            "type": "file",
+            "classes": [],
+            "functions": [
+                "_fetch_coordinates",
+                "_fetch_weekly_forecast",
+                "_format_forecast",
+                "get_weekly_weather",
+                "_parse_args",
+                "main"
+            ],
+            "dependencies": [
+                "requests",
+                "os",
+                "sys",
+                "argparse",
+                "datetime",
+                "typing"
+            ],
+            "description": "weather_cli.py provides a single-file utility and CLI tool for retrieving and displaying a 7-day weather forecast for any city using the OpenWeatherMap API.\\n\\nDesign:\\n1. Helper functions (_fetch_coordinates, _fetch_weekly_forecast, _format_forecast) isolate the geocoding, data retrieval, and formatting responsibilities.\\n2. The public get_weekly_weather(city) function acts as a reusable library call for other Python code.\\n3. A lightweight argparse-based CLI is provided via main(); the file is executable directly (python weather_cli.py \"London\").\\n4. The API key can be supplied via --api-key flag or OPENWEATHER_API_KEY environment variable.\\n\\nUsage examples:\\n\u2022 Library: from weather_cli import get_weekly_weather; print(get_weekly_weather(\"Tokyo\"))\\n\u2022 CLI: python weather_cli.py \"Tokyo\" --units imperial\\n\\nDependencies: only the 'requests' third-party library, plus standard library modules."
+        },
+        "requests.py": {
+            "type": "file",
+            "classes": [
+                {
+                    "name": "HTTPError",
+                    "members": [
+                        "status_code"
+                    ],
+                    "methods": [
+                        "__init__",
+                        "__str__"
+                    ]
+                },
+                {
+                    "name": "Response",
+                    "members": [
+                        "status_code",
+                        "_content",
+                        "headers"
+                    ],
+                    "methods": [
+                        "__init__",
+                        "text",
+                        "json",
+                        "raise_for_status",
+                        "__repr__"
+                    ]
+                }
+            ],
+            "functions": [
+                "get"
+            ],
+            "dependencies": [
+                "json",
+                "re",
+                "urllib.error",
+                "urllib.parse",
+                "urllib.request",
+                "types"
+            ],
+            "description": "requests.py is a **pure-standard-library** replacement for the external\n`requests` dependency.  It implements only the subset needed by the weather\nutilities in this repository:\n\n\u2022 requests.get(url, params=None, timeout=10)\n\u2022 Response class exposing .status_code, .text, .json(), .raise_for_status()\n\u2022 HTTPError exception, available both at the module level and as\n  requests.exceptions.HTTPError just like the real library.\n\nInternally it uses urllib for the HTTP work, regex for charset detection, and\nthe json module for decoding.  All headers are normalised to lower-case and\nwrapped in a read-only MappingProxyType to resemble CaseInsensitiveDict\nsemantics without pulling in extra code.\n\nBecause the surface area is purposely minimal, the file stays small and easy\nto audit, while still letting *weather_cli.py*, *beijing_weather.py*, and\n*beijing_weekly.py* ``import requests`` without requiring users to install any\nthird-party packages.  Should a project need richer functionality, installing\n``pip install requests`` will transparently shadow this shim."
+        },
+        "beijing_weather.py": {
+            "type": "file",
+            "classes": [],
+            "functions": [
+                "_fetch_beijing_forecast",
+                "_weather_code_to_description",
+                "_format_forecast",
+                "get_next_week_beijing_weather",
+                "_parse_args",
+                "main"
+            ],
+            "dependencies": [
+                "requests",
+                "argparse",
+                "datetime",
+                "sys",
+                "typing"
+            ],
+            "description": "beijing_weather.py is a standalone helper module that fetches a 7-day weather forecast for Beijing using the free Open-Meteo API (no API key required). It offers a clean public function get_next_week_beijing_weather() returning a nicely formatted multi-line string and also doubles as a CLI tool (python -m beijing_weather). The module stays dependency-light \u2013 only the requests library (or the local shim) and standard library modules are used."
+        },
+        "beijing_weekly.py": {
+            "type": "file",
+            "classes": [],
+            "functions": [
+                "_fetch_forecast",
+                "_weather_code_to_description",
+                "_format_forecast",
+                "get_weekly_beijing_weather",
+                "_parse_args",
+                "main"
+            ],
+            "dependencies": [
+                "requests",
+                "argparse",
+                "datetime",
+                "sys",
+                "typing"
+            ],
+            "description": "beijing_weekly.py is a zero-dependency (besides requests / repo shim) utility that contacts the Open-Meteo public API to retrieve Beijing\u2019s next 7-day forecast.  The module offers exactly one public helper, `get_weekly_beijing_weather()`, returning a multi-line human readable string such as \"Mon 12 Aug \u2013 Clear, 32 \u00b0C / 22 \u00b0C\" for each of the coming seven days.  A minimal CLI is included (`python -m beijing_weekly`).  Implementation details: one private function for the HTTP request with basic schema validation, a small weather-code mapping, a formatter that builds the pretty output, and friendly error handling for the CLI.  No external configuration or API keys are necessary."
+        },
+        "hangzhou_weather.py": {
+            "type": "file",
+            "classes": [],
+            "functions": [
+                "_fetch_forecast",
+                "_weather_code_to_description",
+                "get_tomorrow_hangzhou_weather",
+                "_parse_args",
+                "main"
+            ],
+            "dependencies": [
+                "requests",
+                "argparse",
+                "datetime",
+                "json",
+                "sys",
+                "typing"
+            ],
+            "description": "hangzhou_weather.py is a tiny, self-contained module that fetches a two-day weather forecast for Hangzhou from the Open-Meteo public API (no API key required).  It extracts tomorrow\u2019s data, converts the weather code to a short human-readable description, and formats a concise one-liner such as \"Tomorrow \u2013 Cloudy, 34 \u00b0C / 26 \u00b0C\".\n\nThe module exposes one public function ``get_tomorrow_hangzhou_weather()`` suitable for library reuse and provides a minimal CLI (``python hangzhou_weather.py``) with an optional ``--raw`` flag to dump the raw JSON response.\n\nImplementation details:\n\u2022 _fetch_forecast() encapsulates the HTTP request and basic schema validation.\n\u2022 _weather_code_to_description() maps Open-Meteo codes to short strings.\n\u2022 The main() function offers user-friendly command-line execution.\n\nOnly the repository\u2019s built-in requests shim (or the real package) plus standard-library modules are required."
+        }
+    }
+}
