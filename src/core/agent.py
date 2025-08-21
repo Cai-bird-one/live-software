@@ -1,9 +1,10 @@
 from ..utils.config import Config
 from ..llm.llm_client import LLMClient
 from ..llm.llm_basics import LLMMessage, LLMResponse
-from ..utils.prompts import add_method_prompt, request_prompt
+from ..utils.prompts import add_method_prompt, request_prompt, make_test_prompt
 from ..utils.state_manager import StateManager
 import json
+import random
 
 config = Config()
 
@@ -21,10 +22,14 @@ class LiveSoftware:
         initial_messages = []
         initial_messages.append(LLMMessage(role="system", content=add_method_prompt + f"Description: {description}"))
         client.set_chat_history(initial_messages)
+        initial_test_messages = []
+        initial_test_messages.append(LLMMessage(role="system", content=make_test_prompt  + f"Description: {description}"))
 
         message = LLMMessage(role="user", content=f"Code structure: {self.state_manager.get_structure_str()}")
         for _ in range(20):
             response = client.chat([message], model_parameters=config.model_providers[config.default_provider])
+            alpha = 3
+            beta = 3
             try:
                 content = json.loads(response.content)
             except json.JSONDecodeError:
@@ -45,9 +50,47 @@ class LiveSoftware:
             elif content["operation"] == "modify":
                 if content["file_path"] is None or content["code"] is None or content["description"] is None:
                     return False
+                codes = []
+                test = []
+                codes.append(content["code"])
+                for i in range(alpha - 1):
+                    tmp_code_client = LLMClient(config.default_provider, config.model_providers[config.default_provider])
+                    tmp_code_client.set_chat_history(initial_messages)
+                    num = random.randint(0, 65536)
+                    message = LLMMessage(role="user", content=f"Code structure: {self.state_manager.get_structure_str()} \n"                 
+                                        + f"Random_token:{num}\n")
+                    response = tmp_code_client.chat([message], model_parameters=config.model_providers[config.default_provider])
+                    try:
+                        content_i = json.loads(response.content)
+                    except json.JSONDecodeError:
+                        continue
+                    if "code" in content_i:
+                        codes.append(content_i["code"])
+                    else:
+                        print("Warning: Response from LLM does not contain 'code' key. Skipping this response.")
+                        continue
+                for i in range(beta - 1):
+                    tmp_test_client = LLMClient(config.default_provider, config.model_providers[config.default_provider])
+                    tmp_test_client.set_chat_history(initial_test_messages)
+                    num = random.randint(0, 65536)
+                    message = LLMMessage(role="user", content=f"Code structure: {self.state_manager.get_structure_str()} \n"
+                                        + f"Modify_file_path:{content['file_path']} \n"
+                                        + f"Random_token:{num}\n")
+                    response = tmp_test_client.chat([message], model_parameters=config.model_providers[config.default_provider])
+                    try:
+                        content_i = json.loads(response.content)
+                    except json.JSONDecodeError:
+                        continue
+                    if "code" in content_i:
+                        test.append(content_i["code"])
+                    else:
+                        print("Warning: Response from LLM does not contain 'code' key. Skipping this response.")
+                        continue
+
+                final_select_code = self.state_manager.select_code(codes, test, content["file_path"])
                 success = self.state_manager.update_code(
                     content["file_path"],
-                    content["code"],
+                    final_select_code,
                     content.get("classes", []),
                     content.get("functions", []),
                     content.get("dependencies", []),
@@ -78,6 +121,7 @@ class LiveSoftware:
             if "operation" not in content:
                 return {"thought": "Error: Invalid response format.", "stop_message": "Invalid response format."}
             # 检查LLM的计划并执行
+            # print(content["operation"])
             if content["operation"] == "add":
                 description = content.get("description", "")
                 if not self.add_method(description):

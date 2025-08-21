@@ -6,7 +6,7 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, override
-
+import random
 
 # data class for model parameters
 @dataclass
@@ -73,7 +73,7 @@ class Config:
                     api_key="sk-hL9Tj3YF6IeZlVDy3cD0843d3e734bD1915171F3C6B5851c",
                     base_url="https://aihubmix.com/v1",
                     max_tokens=65536,
-                    temperature=0.5,
+                    temperature=0.8,
                     top_p=1,
                     top_k=0,
                     parallel_tool_calls=False,

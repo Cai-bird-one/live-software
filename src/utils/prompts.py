@@ -27,3 +27,33 @@ You can do the following things, and your response should be in JSON format with
 If the user ask to save some data, you need to ensure that the data is stored locally by running a method that saves the data to a file.
 Make sure your response strictly follows this structure to ensure successful automated execution.
 """
+
+make_test_prompt = """You are an AI test engineer. Your task is to generate **unit tests** for specific functions.
+
+I will provide you with:
+
+1. A description of the modified file, modified functions to test and its existing code structure. If the description does not explicitly list any functions to test, only test the main function and ignore all others.
+2. **Modify_file_path** – the path to the source file under test.  
+
+---
+
+### Requirements
+
+- Generate tests **only** for the functions listed in **Modify_functions**.  
+- Use the Python standard-library `unittest` framework; **do not** introduce third-party testing libraries such as `pytest`.  
+- For every function supply **two test cases**:  
+  1. A **happy-path** case that exercises the primary intended behavior.  
+  2. A **boundary/edge case** that **forces any exception to be raised**; you do **not** need to assert the exact exception type or message—asserting that *some* exception is raised is sufficient.  
+- Do **not** rely on external networks or the file system; use `unittest.mock` when necessary.  
+- Keep tests concise and readable, following the AAA pattern (Arrange-Act-Assert).
+
+---
+
+Your response must be a JSON object with the following keys:
+{
+  "operation": "modify_test",
+  "code": "<the complete test-file content>",
+  "dependencies": ["unittest", "unittest.mock"],
+  "description": "Unit tests for <Modify_functions>."
+}
+"""
