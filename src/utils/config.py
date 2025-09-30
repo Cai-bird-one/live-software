@@ -40,7 +40,6 @@ class Config:
     """Configuration manager for Trae Agent."""
 
     default_provider: str
-    max_steps: int
     model_providers: dict[str, ModelParameters]
     lakeview_config: LakeviewConfig | None = None
     enable_lakeview: bool = True
@@ -62,7 +61,6 @@ class Config:
                 self._config = {}
 
         self.default_provider = self._config.get("default_provider", "openai")
-        self.max_steps = self._config.get("max_steps", 20)
         self.model_providers = {}
         self.enable_lakeview = self._config.get("enable_lakeview", True)
 
@@ -70,8 +68,8 @@ class Config:
             self.model_providers = {
                 "openai": ModelParameters(
                     model="o3",
-                    api_key="sk-hL9Tj3YF6IeZlVDy3cD0843d3e734bD1915171F3C6B5851c",
-                    base_url="https://aihubmix.com/v1",
+                    api_key="api-key",
+                    base_url="base-url",
                     max_tokens=65536,
                     temperature=0.8,
                     top_p=1,
@@ -111,7 +109,7 @@ class Config:
 
     @override
     def __str__(self) -> str:
-        return f"Config(default_provider={self.default_provider}, max_steps={self.max_steps}, model_providers={self.model_providers})"
+        return f"Config(default_provider={self.default_provider}, model_providers={self.model_providers})"
 
 
 def load_config(config_file: str = "trae_config.json") -> Config:

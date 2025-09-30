@@ -26,7 +26,7 @@ class LiveSoftware:
         initial_test_messages.append(LLMMessage(role="system", content=make_test_prompt  + f"Description: {description}"))
 
         message = LLMMessage(role="user", content=f"Code structure: {self.state_manager.get_structure_str()}")
-        for _ in range(20):
+        for _ in range(50):
             response = client.chat([message], model_parameters=config.model_providers[config.default_provider])
             alpha = 3
             beta = 3
@@ -112,13 +112,16 @@ class LiveSoftware:
             "stop_message": None
         }
         message = LLMMessage(role="user", content=f"User Requirement: {requirement}")
-        for _ in range(10):
+        for _ in range(50):
             response = self.request_client.chat([message], model_parameters=config.model_providers[config.default_provider])
+            print(response.content)
             try:
                 content = json.loads(response.content)
             except json.JSONDecodeError:
+                print(111)
                 return {"thought": "Error: Invalid response format.", "stop_message": "Invalid response format."}
             if "operation" not in content:
+                print(222)
                 return {"thought": "Error: Invalid response format.", "stop_message": "Invalid response format."}
             # 检查LLM的计划并执行
             # print(content["operation"])
