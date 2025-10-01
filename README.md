@@ -32,7 +32,7 @@ pip install -r requirements.txt
 
 ## Directory layout
 ```
-yourrepo/
+repo/
 ├── src/        # Source code
 ├── config.json # Configuration file
 ├── requirements.txt
