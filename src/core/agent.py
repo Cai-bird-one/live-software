@@ -114,14 +114,14 @@ class LiveSoftware:
         message = LLMMessage(role="user", content=f"User Requirement: {requirement}")
         for _ in range(50):
             response = self.request_client.chat([message], model_parameters=config.model_providers[config.default_provider])
-            print(response.content)
+            # print(response.content)
             try:
                 content = json.loads(response.content)
             except json.JSONDecodeError:
-                print(111)
+                # print(111)
                 return {"thought": "Error: Invalid response format.", "stop_message": "Invalid response format."}
             if "operation" not in content:
-                print(222)
+                # print(222)
                 return {"thought": "Error: Invalid response format.", "stop_message": "Invalid response format."}
             # 检查LLM的计划并执行
             # print(content["operation"])
@@ -157,6 +157,6 @@ if __name__ == "__main__":
             break
         else:
             response = live_software.request(str)
-            print("response:", response)
-            print("structure:", live_software.get_structure())
+            print("response:", response['result'])
+            # print("structure:", live_software.get_structure())
 

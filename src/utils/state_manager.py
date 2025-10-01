@@ -144,9 +144,9 @@ class StateManager:
                 success = proc.returncode == 0
                 passed += success
                 total += 1
-            print(f"Test Generator: {c_idx}")
-            print(passed)
-            print(total)
+            # print(f"Test Generator: {c_idx}")
+            # print(passed)
+            # print(total)
             score = passed / total
             if score > best_score:
                 best_score = score

@@ -21,7 +21,7 @@ def run_local_code_in_docker(code_dir: str, entry_file: str = "main.py", args = 
     container_name = f"sandbox_{uuid.uuid4().hex[:8]}"
 
     args_list = args.split() if args else []
-    print(args_list)
+    # print(args_list)
 
     docker_cmd = [
     "docker", "run", "--rm",
@@ -35,7 +35,7 @@ def run_local_code_in_docker(code_dir: str, entry_file: str = "main.py", args = 
     "python", f"/app/{entry_file}",
     ] + args_list
 
-    print(" ".join(docker_cmd))
+    # print(" ".join(docker_cmd))
     try:
         result = subprocess.run(
             docker_cmd,
