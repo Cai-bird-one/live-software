@@ -87,7 +87,7 @@ Using weather prediction as an example, we explain how our method operates in de
 
 Initially, when no user operations have been performed, the system contains only a `Leader` node. The `Data Manager` maintains the Meta Node at this stage.
 
-``` json
+```
 Code structure: {
     "type": "dir", 
     "children": {}
@@ -106,7 +106,7 @@ Once the `Leader` designates the `Code Generator` as the next step, the `Code Ge
 
 Upon completion of cross-validation among multiple code candidates and testing programs, the code with the highest confidence score is selected. This optimal code is subsequently persisted to the `Data Manager`, triggering a structural update.
 
-``` json
+```
 Code structure: {
     'type': 'dir', 
     'children': {
