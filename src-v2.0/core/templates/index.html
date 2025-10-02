@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Self-Evolving Software</title>
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+    <script src="{{ url_for('static', filename='cytoscape.min.js') }}"></script>
+    <script src="https://unpkg.com/dagre@0.8.5/dist/dagre.min.js"></script>
+    <script src="https://unpkg.com/cytoscape-dagre@2.5.0/cytoscape-dagre.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Self-Evolving Software</h1>
+        </header>
+
+        <div class="main-content">
+            <div id="data-code-area" class="panel">
+                <h2>Data / Code / Result</h2>
+                <pre><code id="code-display" class="language-python">Results will be displayed here.</code></pre>
+            </div>
+            <div id="visualization-area" class="panel">
+                <h2>Graph Visualization</h2>
+                <div class="vis-controls">
+                    <label><input type="radio" name="graph-type" value="node" checked> Node Graph</label>
+                    <label><input type="radio" name="graph-type" value="class"> Class Graph</label>
+                </div>
+                <div id="cy"></div>
+            </div>
+        </div>
+
+        <div id="terminal-area" class="panel">
+            <h2>User Terminal</h2>
+            <div id="terminal-output"></div>
+            <div class="terminal-input-container">
+                <span>></span>
+                <input type="text" id="terminal-input" placeholder="Type your command and press Enter...">
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    
+</body>
+</html>

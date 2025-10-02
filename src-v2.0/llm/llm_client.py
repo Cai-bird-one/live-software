@@ -1,0 +1,82 @@
+# Copyright (c) 2025 ByteDance Ltd. and/or its affiliates
+# SPDX-License-Identifier: MIT
+
+"""LLM Client wrapper for OpenAI, Anthropic, Azure, and OpenRouter APIs."""
+
+from enum import Enum
+
+from .base_client import BaseLLMClient
+from ..utils.config import ModelParameters
+from .llm_basics import LLMMessage, LLMResponse
+import os, sys
+
+
+class LLMProvider(Enum):
+    """Supported LLM providers."""
+
+    OPENAI = "openai"
+    ANTHROPIC = "anthropic"
+    AZURE = "azure"
+    OLLAMA = "ollama"
+    OPENROUTER = "openrouter"
+    DOUBAO = "doubao"
+    GOOGLE = "google"
+
+
+class LLMClient(BaseLLMClient):
+    """Main LLM client that supports multiple providers."""
+
+    def __init__(self, provider: str | LLMProvider, model_parameters: ModelParameters):
+        if isinstance(provider, str):
+            provider = LLMProvider(provider)
+
+        self.provider: LLMProvider = provider
+
+        match provider:
+            case LLMProvider.OPENAI:
+                from .openai_client import OpenAIClient
+
+                self.client: BaseLLMClient = OpenAIClient(model_parameters)
+            # case LLMProvider.ANTHROPIC:
+            #     from .anthropic_client import AnthropicClient
+
+            #     self.client = AnthropicClient(model_parameters)
+            # case LLMProvider.AZURE:
+            #     from .azure_client import AzureClient
+
+            #     self.client = AzureClient(model_parameters)
+            # case LLMProvider.OPENROUTER:
+            #     from .openrouter_client import OpenRouterClient
+
+            #     self.client = OpenRouterClient(model_parameters)
+            # case LLMProvider.DOUBAO:
+            #     from .doubao_client import DoubaoClient
+
+            #     self.client = DoubaoClient(model_parameters)
+            # case LLMProvider.OLLAMA:
+            #     from .ollama_client import OllamaClient
+
+            #     self.client = OllamaClient(model_parameters)
+            # case LLMProvider.GOOGLE:
+            #     from .google_client import GoogleClient
+
+            #     self.client = GoogleClient(model_parameters)
+
+    # def set_trajectory_recorder(self, recorder: TrajectoryRecorder | None) -> None:
+    #     """Set the trajectory recorder for the underlying client."""
+    #     self.client.set_trajectory_recorder(recorder)
+
+    def set_chat_history(self, messages: list[LLMMessage]) -> None:
+        """Set the chat history."""
+        self.client.set_chat_history(messages)
+
+    def chat(
+        self,
+        messages: list[LLMMessage],
+        model_parameters: ModelParameters,
+        reuse_history: bool = True,
+        temperature: float | None = None,
+    ) -> LLMResponse:
+        """Send chat messages to the LLM."""
+        return self.client.chat(messages, model_parameters, reuse_history, temperature=temperature)
+

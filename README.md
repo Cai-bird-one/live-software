@@ -55,7 +55,8 @@ pip install -r requirements.txt
 
 ```
 repo/
-├── src/        # Source code
+├── src/        # Source code for unit-test
+├── src-v2.0/        # Source code for cross validation
 ├── config.json # Configuration file
 ├── requirements.txt
 ├── demo.gif    # Demo GIF
